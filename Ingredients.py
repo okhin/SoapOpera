@@ -3,9 +3,13 @@
 # Classe de definition d'un Ingrédient
 class Ingredient:
 	"""A base class for defining products and ingredients used in recipes"""
-	def __init__(this, nom, stock = 0):
-		this.nom = nom
+	def __init__(this, ref, stock = 0):
+		this.ref = ref
 		this.stock = stock
+	def setNom(this, nom):
+		this.nom = nom
+	def operator.__eq__(self, other):
+		return this.ref == other.ref
 
 class Gras(Ingredient):
 	"""A class that defines the Oil used in recipes"""
@@ -14,7 +18,7 @@ class Gras(Ingredient):
 		this.sap = sap
 		this.ins = ins
 	def soude(this):
-		return this.sap*0.713/1000
+		return this.sap * 0.713/1000
 
 class HE(Ingredient):
 	"""A class for Esential oils"""
