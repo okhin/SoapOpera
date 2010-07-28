@@ -5,20 +5,19 @@ class Recette:
 	surgraissage = 0.08
 	soude = 0
 	concentration = 0.35
-	volume = 1000
+	masse = 1000
 	def __init__(self, gras, he, additifs):
 		"""Les arguments sont des listes de tuples avec ratio/ingredients"""
 		this.gras = [(x,v) for (x,v) in gras if v.isinstance(Ingredients.Gras)]
 		this.he = he
 		this.additifs = additifs
 	def soude(self):
-		this.soude = sum([gras[0].soude()*gras[1]*self.volume for gras in self.gras])*(1 - this.surgraissage)
+		this.soude = sum([gras[0].soude()*gras[1]*self.masse for gras in self.gras])*(1 - this.surgraissage)
 
 	def eau(self):
-		"""Concentration = taux de soude pour le volume total (graisse + eau).
-		Donc, graisse + eau = taux de soude / concentration
-		Donc eau = taux de soude / concentration - graisse."""
-		this.eau = this.soude / this.concentration - this.volume
+		"""Concentration = eau/graisse
+		eau = concentration*graisse"""
+		this.eau = this.concentration * this.masse
 
 	def satUnsat(self):
 		# On commence par rafraîchir les gras de la recette
