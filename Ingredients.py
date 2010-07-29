@@ -16,44 +16,31 @@ class Ingredient:
 
 class Gras(Ingredient):
 	"""La gestion des graisses pour faire le savon"""
-	indices = {}
+	acidesGras = new AcideGras()
 	def __init__(this, nom, ref, "Gras", sap = 0, ins = 0):
 		Ingredient.__init__(this, nom, stock)
 		this.sap = sap
 		this.ins = ins
-		this.saturation()
 
 	def soude(this):
 		"""Calcul la quantite de soude par gramme de gras
 		La sap est à multiplier par 0,713 pour avoir la quantite de soude par kilo de gras"""
 		return this.sap * 0.713/1000
 
-	def getIndice(this, indice):
-		"""On récupère la valeur d'un indice particulier. Si il n'est pas definit, c'est qu'il vaut 0"""
-		if indice in this.indices.keys():
-			return this.indices(indice)
-		return 0
+	def getAcideGras(this, acide):
+		"""On récupère un acide gras particulier.""" 
+		return this.acidesGras[acide]
+
+class AcidesGras(Dict):
+	"""Les indices (trucs en latins bizarre) qui définissent la saturation des gras.
+	c'ets un dictionnaire de tuples. La clef est le nom de l'indice et le tuple
+	est un tuple de valeur définissant le type (sat/unsat) et le pourcentage dans le gras. 
+
+	On a donc {acide:(saturation,ratio)}"""
 
 	def saturation(this):
-		this.sat = 0
-		this.unsat = 0
-		for (indice, quantite) in this.indices:
-			if indice.sat:
-				this.sat += indice.ratio * quantite
-			else
-				this.unsat += indice.ratio * quantite
-
-class Indice():
-	"""Les indices de saturation ont besoin d'un peu de boulot avant de pouvoir être intégré.
-	la valeur sat définit si il s'agit d'un indice Saturé/Polysaturé/Monosaturé whatever.
-	Si elle est à 1 on ajoute à la Sat, sinon à l'Unsat"""
-	def __init__(this, nom, sat, ratio):
-		this.nom = nom
-		if sat > 0:
-			this.sat = 1
-		else
-			this.sat = 0
-		this.ratio = ratio
-	def __eq__(this, other):
-		if other.isinstance(Ingredients.Indice):
-			return this.nom == other.nom	
+		sat = 0
+		for (saturation, ratio) in this.items():
+			if saturation:
+				sat += ratio
+		return sat
