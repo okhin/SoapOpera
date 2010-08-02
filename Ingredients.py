@@ -1,7 +1,5 @@
 #!/usr/bin/python
 # -*- coding: iso-8859-15 -*-
-# Import
-
 # Classes de definition d'un Ingrédient
 
 class Ingredient:
