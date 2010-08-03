@@ -2,7 +2,7 @@
 # -*- coding: iso-8859-15 -*-
 # Classes de definition d'un Ingrédient
 
-class Ingredient:
+class Ingredient():
 	"""La classe de base pour les ingredients, ajouts et autres trucs divers"""
 	def __init__(this, nom, ref, famille):
 		this.ref = ref
@@ -44,4 +44,3 @@ class Gras(Ingredient):
 	def getAcideGras(this, acide):
 		"""On récupère un acide gras particulier.""" 
 		return this.acidesGras[acide]
-
