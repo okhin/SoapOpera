@@ -41,11 +41,6 @@ class Gras(Ingredient):
 		this.sap = sap
 		this.ins = ins
 
-	def soude(this):
-		"""Calcul la quantite de soude par gramme de gras
-		La sap est à multiplier par 0,713 pour avoir la quantite de soude par kilo de gras"""
-		return this.sap * 0.713/1000
-
 	def getAcideGras(this, acide):
 		"""On récupère un acide gras particulier.""" 
 		return this.acidesGras[acide]

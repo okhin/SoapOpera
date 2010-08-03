@@ -6,7 +6,6 @@ class Recette:
 	surgraissage = 0.08
 	soude = 0
 	concentration = 0.35
-	masse = 1000
 	def __init__(self, acideGras, he, additifs):
 		"""Les arguments sont des listes de tuples avec ratio/ingredients"""
 		this.listeGras = [(pourcent, gras) for (x,v) in acideGras if v.isinstance(Ingredients.Gras)]
@@ -14,7 +13,10 @@ class Recette:
 		this.additifs = additifs
 
 	def soude(self):
-		this.soude = sum([gras.soude() * taux * self.masse for (taux, gras) in self.listeGras]) * (1 - this.surgraissage)
+		"""Quantité de soude en pourcentage.
+		On travaille en NaOH donc le ratio est de 40/56,1
+		comme la sap est en soude par kilo, on divise par 1000"""
+		this.soude = [ pourcent * gras.sap * 40/56100 for (pourcent, gras) in this.listeGras ].sum()
 
 	def eau(self):
 		"""Concentration = eau/graisse
