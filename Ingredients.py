@@ -1,6 +1,8 @@
 #!/usr/bin/python
 # -*- coding: iso-8859-15 -*-
 # Classes de definition d'un Ingrédient
+# User Import
+import Csv 
 
 class Ingredient():
 	"""La classe de base pour les ingredients, ajouts et autres trucs divers"""
@@ -13,6 +15,13 @@ class Ingredient():
 		"""Si le nom lation a une longueur nulle, c'est qu'il n'est pas défini, donc on retourne le nom vulgaire"""
 		return this.latin if len(this.latin) > 0 else this.nom
 
+	def load(this, ref):
+		loader = Csv.load("csv/ingredients.csv", "ref", ref)
+		if loader is not None:
+			this.ref = loader["ref"]
+			this.famille = loader["famille"]
+			this.nom = loader["nom"]
+
 	def __eq__(this, other):
 		"""Un comparateur d'ingredients, pour vérifier si deux composants sont les mêmes. On vérifie les references des objets"""
 		return this.ref() == other.ref()
@@ -22,12 +31,14 @@ class AcidesGras(dict):
 	c'est un dictionnaire de tuples. La clef est le nom de l'indice et le tuple
 	est un tuple de valeur définissant le type (sat/unsat) et le pourcentage dans le gras. 
 
-	On a donc {acide:(saturation,ratio)}"""
+	On a donc {acide:(nom de l'indice,valeur)}"""
+	def load(this, nom):
+		this = Csv.load("csv/acidegras.csv", "nom", nom)
+		 
 	def saturation(this):
-		sat = 0
-		for (saturation, ratio) in this.items():
-			if saturation:
-				sat += ratio
+		saturations = Csv.loadall("csv/saturation.csv")
+		for (acide, saturation) in saturations:
+			if saturation: sat += this[acide] 
 		return sat
 
 	def unsaturation(this):

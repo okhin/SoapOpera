@@ -10,8 +10,6 @@ import csv
 import sys
 
 # User import
-import Ingredients
-import Recettes
 
 def load(filename, key, value):
 	"""On charge un élément depuis un fichier particulier en cherchant une valeur dans une clef
@@ -23,3 +21,11 @@ def load(filename, key, value):
 		sys.exit("file %s, line %d: %s" % (filename, csvReader.line_num, e))
 	# If not found, return none	
 	return None
+
+def loadall(filename):
+	"""On charge toutes les lignes d'un CSV dans une liste de tuples"""
+	retour = []
+	reader = csv.DictReader(open(filename, 'rb'))
+	for row in reader:
+		retour.append(row)
+	return retour
