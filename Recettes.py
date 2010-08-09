@@ -7,26 +7,32 @@ class Recette:
 	surgraissage = 0.08
 	soude = 0
 	concentration = 0.35
-	def __init__(self, acideGras, he, additifs):
+	def __init__(this, acideGras, he, additifs):
 		"""Les arguments sont des listes de tuples avec ratio/ingredients"""
-		this.listeGras = [(pourcent, gras) for (x,v) in acideGras if v.isinstance(Ingredients.Gras)]
+		this.listeGras = acideGras
 		this.he = he
 		this.additifs = additifs
 
-	def soude(self):
+	def calcSoude(this):
 		"""Quantité de soude en pourcentage.
 		On travaille en NaOH donc le ratio est de 40/56,1
 		comme la sap est en soude par kilo, on divise par 1000"""
-		this.soude = [ pourcent * gras.sap * 40/56100 for (pourcent, gras) in this.listeGras ].sum()
+		this.soude = 0
+		for (taux, gras) in this.listeGras:
+			acidegras = Ingredients.Gras()
+			acidegras.load(gras)
+			this.soude += float(taux) * float(acidegras.sap) * ( 40 / 56100)
 
-	def eau(self):
+	def calcEau(this):
 		"""Concentration = eau/graisse
 		eau = concentration*graisse"""
 		this.eau = this.concentration * this.masse
 
-	def satUnsat(self):
+	def satUnsat(this):
 		# On commence par rafraîchir les gras de la recette
 		this.sat = this.unsat = 0
 		for (taux, gras) in this.listeGras:
-			this.sat += this.gras.acideGras.saturation() * taux
-			this.unsat += this.gras.acideGras.unsaturation() * taux
+			acidegras = Ingredients.Gras()
+			acidegras.load(gras)
+			this.sat += acidegras.acideGras.saturation() * taux
+			this.unsat += acidegras.acideGras.unsaturation() * taux
