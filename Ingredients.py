@@ -6,11 +6,6 @@ import Csv
 
 class Ingredient():
 	"""La classe de base pour les ingredients, ajouts et autres trucs divers"""
-	def __init__(this, nom, ref, famille):
-		this.ref = ref
-		this.famille = famille
-		this.nom = nom
-
 	def nom(this):
 		"""Si le nom lation a une longueur nulle, c'est qu'il n'est pas défini, donc on retourne le nom vulgaire"""
 		return this.latin if len(this.latin) > 0 else this.nom
@@ -33,7 +28,8 @@ class AcidesGras(dict):
 
 	On a donc {acide:(nom de l'indice,valeur)}"""
 	def load(this, nom):
-		this = Csv.load("csv/acidegras.csv", "nom", nom)
+		loader = Csv.load("csv/acidegras.csv", "nom", nom)
+		this.update(loader)
 		 
 	def saturation(this):
 		saturations = Csv.loadall("csv/saturation.csv")
@@ -46,12 +42,12 @@ class AcidesGras(dict):
 
 class Gras(Ingredient):
 	"""La gestion des graisses pour faire le savon"""
-	acidesGras = AcidesGras({})
-	def __init__(this, nom, ref, sap = 0, ins = 0):
-		Ingredient.__init__(this, nom, ref, 'Gras')
-		this.sap = sap
-		this.ins = ins
-
-	def getAcideGras(this, acide):
-		"""On récupère un acide gras particulier.""" 
-		return this.acidesGras[acide]
+	def load(this, ref):
+		"""On récupère les données en deux temps"""
+		Ingredient.load(this, ref)
+		acides = AcidesGras()
+		acides.load(this.ref)
+		this.sap = acides.pop("sap")
+		this.ins = acides.pop("ins")
+		del acides["nom"]
+		this.acideGras = acides
