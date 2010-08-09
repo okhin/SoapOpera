@@ -1,5 +1,6 @@
 #!/usr/bin/python
 # -*- coding: iso-8859-15 -*-
+import Ingredients
 
 class Recette:
 	"""Une classe pour stocker les recettes"""
