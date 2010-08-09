@@ -16,7 +16,9 @@ def load(filename, key, value):
 	On retourne un dictionnaire de résultat ou une liste vide (None)."""
 	reader = csv.DictReader(open(filename, 'rb'))
 	try:
-		return [row for row in reader if row[key] == value]
+		for row in reader:
+			if row[key] == value:
+				return row 
 	except csv.Error, e:
 		sys.exit("file %s, line %d: %s" % (filename, csvReader.line_num, e))
 	# If not found, return none	
