@@ -13,26 +13,29 @@ class Recette:
 		this.he = he
 		this.additifs = additifs
 
-	def calcSoude(this):
+	def soude(this):
 		"""Quantité de soude en pourcentage.
 		On travaille en NaOH donc le ratio est de 40/56,1
 		comme la sap est en soude par kilo, on divise par 1000"""
-		this.soude = 0
+		soude = 0.0
 		for (taux, gras) in this.listeGras:
 			acidegras = Ingredients.Gras()
 			acidegras.load(gras)
-			this.soude += float(taux) * float(acidegras.sap) * ( 40 / 56100)
+			soude += float(taux) * float(acidegras.sap) * ( 40.0 / 56100.0)
+		return soude
 
-	def calcEau(this):
+	def eau(this):
 		"""Concentration = eau/graisse
 		eau = concentration*graisse"""
-		this.eau = this.concentration * this.masse
+		return this.concentration 
 
 	def satUnsat(this):
 		# On commence par rafraîchir les gras de la recette
-		this.sat = this.unsat = 0
-		for (taux, gras) in this.listeGras:
-			acidegras = Ingredients.Gras()
-			acidegras.load(gras)
-			this.sat += acidegras.acideGras.saturation() * taux
-			this.unsat += acidegras.acideGras.unsaturation() * taux
+		this.sat =  0.0
+		this.unsat = 0.0
+		for (taux, nom) in this.listeGras:
+			gras = Ingredients.Gras()
+			gras.load(nom)
+			print gras.acideGras
+			this.sat += gras.saturation() * taux
+			this.unsat += gras.unsaturation() * taux

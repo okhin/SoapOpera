@@ -31,15 +31,6 @@ class AcidesGras(dict):
 		loader = Csv.load("csv/acidegras.csv", "nom", nom)
 		this.update(loader)
 		 
-	def saturation(this):
-		saturations = Csv.loadall("csv/saturation.csv")
-		for (acide, saturation) in saturations:
-			if saturation: sat += this[acide] 
-		return sat
-
-	def unsaturation(this):
-		return 100 - this.saturation()
-
 class Gras(Ingredient):
 	"""La gestion des graisses pour faire le savon"""
 	def load(this, ref):
@@ -51,3 +42,15 @@ class Gras(Ingredient):
 		this.ins = acides.pop("ins")
 		del acides["nom"]
 		this.acideGras = acides
+
+	def saturation(this):
+		sat = 0
+		saturations = Csv.loadall("csv/saturation.csv")
+		for items in saturations:
+			if int(items["saturation"]) == 1:
+				sat += int(this.acideGras[items["acidegras"]])
+		return sat
+
+	def unsaturation(this):
+		return 100 - this.saturation()
+
