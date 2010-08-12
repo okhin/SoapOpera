@@ -7,7 +7,7 @@ import Csv
 class Ingredient():
 	"""La classe de base pour les ingredients, ajouts et autres trucs divers"""
 	def nom(this):
-		"""Si le nom lation a une longueur nulle, c'est qu'il n'est pas défini, donc on retourne le nom vulgaire"""
+		"""Si le nom latin a une longueur nulle, c'est qu'il n'est pas défini, donc on retourne le nom vulgaire"""
 		return this.latin if len(this.latin) > 0 else this.nom
 
 	def load(this, ref):

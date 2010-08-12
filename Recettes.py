@@ -39,3 +39,26 @@ class Recette:
 			print gras.acideGras
 			this.sat += gras.saturation() * taux
 			this.unsat += gras.unsaturation() * taux
+
+	def add(this, ingredient, taux):
+		ingr = Ingredients.Ingredient()
+		ingr.load(ingredient)
+		famille = ingr.famille
+		if famille == "Gras":
+			liste = this.listeGras
+		elif famille == "HE":
+			liste = this.he
+		else:
+			liste = this.additifs
+
+		nombre = len(liste)
+		partial = float(taux / nombre)
+		liste = [ (t - partial, i) for (t, i) in liste ]
+		liste.append((taux, ingredient))
+
+		if famille == "Gras":
+			this.listeGras = liste[:]
+		elif famille == "HE":
+			this.he = liste[:]
+		else:
+			this.additifs = liste[:]

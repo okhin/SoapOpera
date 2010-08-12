@@ -2,10 +2,11 @@
 # -*- coding: iso-8859-15 -*-
 # Classes and function usefull for SQLite interaction
 # System imports
-from pysqlite2 import dbapi2 as sqlite
+import sqlite3 as sqlite
 import os.path
 
 # Applicatives Import
+import Csv
 import Ingredients
 import Recettes
 
@@ -14,77 +15,54 @@ cursor = connection.cursor()
 
 def InitAppli():
 	# Table Ingredient qui contient toutes les donnees generiques
-	cursor.execute('CREATE TABLE "Ingredients" (ref VARCHAR(50) PRIMARY KEY, famille VARCHAR(50), nom VARCHAR(50))')
+	cursor.execute('CREATE TABLE "Ingredients" (id INTEGER PRIMARY KEY AUTOINCREMENT, ref VARCHAR(50), famille VARCHAR(50), nom VARCHAR(50))')
 	connection.commit()
 
 	# Table AcideGras qui contient les compositions en Acide Gras, la SAP et l'INS des gras utilisés.
 	# Lien avec la table Ingredients par la reference.
-	cursor.execute('CREATE TABLE "AcideGras" (ref VARCHAR(50) PRIMARY KEY,
-		ins NUMBER, 
-		sap NUMBER,
-		lauric NUMBER,
-		myristic NUMBER,
-		palmitic NUMBER,
-		stearic NUMBER,
-		ricinoleic NUMBER,
-		oleic NUMBER,
-		linoleic NUMBER,
-		linolenic NUMBER)')
+	cursor.execute('CREATE TABLE "AcideGras" (id INTEGER PRIMARY KEY, \
+		ins INTEGER, \
+		sap INTEGER, \
+		lauric INTEGER, \
+		myristic INTEGER, \
+		palmitic INTEGER, \
+		stearic INTEGER, \
+		ricinoleic INTEGER, \
+		oleic INTEGER, \
+		linoleic INTEGER, \
+		linolenic INTEGER, \
+		other_sat INTEGER, \
+		other_unsat INTEGER)')
 	connection.commit()
 
 	# Table de saturation deux champs, nom (unique) et boolean saturation
-	cursor.execute('CREATE TABLE "Saturation" (nom VARCHAR(50) PRIMARY KEY, saturation BOOLEAN)')
+	cursor.execute('CREATE TABLE "Saturation" (nom VARCHAR(50), saturation BOOLEAN)')
 	connection.commit()
 
-	# Feed in some dummy datas
-	cursor.execute('INSERT INTO "Ingredients" VALUES ("1", "Gras", "UnGras")')
-	cursor.execute('INSERT INTO "AcideGras" VALUES ("1", 123, 287, 44)')
+	# Tables de recette
+	cursor.execute('CREATE TABLE "Recette" (id INTEGER PRIMARY KEY AUTOINCREMENT, nom VARCHAR(50), ref VARCHAR(50))')
+	connection.commit()
+	
+	# Tables de relation recettes
+	cursor.execute('CREATE TABLE "rec_acidegras" (rec_id INTEGER, acide_id, NUMBER, taux NUMBER)')
+	cursor.execute('CREATE TABLE "rec_he" (rec_id INTEGER, he_id, NUMBER, taux NUMBER)')
+	cursor.execute('CREATE TABLE "rec_additifs" (rec_id INTEGER, additifs_id, NUMBER, taux NUMBER)')
 	connection.commit()
 
 # Import Saturation from csv
-def CSV_Saturation(filename):
-	try:
-		f = open(filename,'rb', 0)
-		try:
-			for lines in f.readlines():
-				if line.startswith('#'):
-					continue
-				parts = lines.split(';')
-				cursor.execute('INSERT INTO Saturation VALUES (?, ?)', (parts))
-				connection.commit
-		finally:
-			f.close()
+def importSaturation(filename):
+	"""Importer la saturation depuis un fichier csv."""
+	cursor.execute("DELETE FROM Saturation")
+	connection.commit()
 
-	except IOError:
-		pass
+	for d in Csv.loadall(filename):
+		cursor.execute("INSERT INTO Saturation VALUES (?, ?)", (d["acidegras"], d["saturation"]))
+		connection.commit()
 
-def CSV_Ingredient(filename):
-	try:
-		f = open(filename, 'rb', 0)
-		try:
-			for line in f.readlines():
-				if line.startswith('#'):
-					continue
-				parts = lines.split(';')
-				cursor.execute('INSERT INTO Ingredients VALUES (?, ?, ?,)', (parts))
-				connection.commit
-		finally:
-			f.close()
+def importIngredients(filename):
+	"""Importer les ingredients depuis un fichier csv. Opération destructrice."""
+	cursor.execute("DELETE FROM Ingredients")
+	connection.commit()
 
-def CSV_AcideGras(filename):
-	try:
-		f = open(filename, 'rb', 0)
-		try:
-			for line in f.readlines():
-				if line.startswith('#'):
-					continue
-				parts = lines.split(';')
-				acideGras.add(parts[0], parts[1]) 
-				cursor.execute('INSERT INTO AcideGras VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)', (parts))
-				connection.commit
-		finally:
-			f.close()
-
-def SELECT_Saturation():
-	cursor.execute('SELECT * FROM Saturation')
-	print cursor.fetchall()
+	cursor.execute("INSERT INTO Ingredients VALUES (NULL, ?, ?, ?)", Csv.loadall("csv/ingredients.csv"))
+	connection.commit()
