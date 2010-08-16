@@ -6,12 +6,12 @@ class Recette:
 	"""Une classe pour stocker les recettes"""
 	surgraissage = 0.08
 	soude = 0
-	concentration = 0.35
-	def __init__(this, acideGras, he, additifs):
+	concentration = 0.38
+	def __init__(this):
 		"""Les arguments sont des listes de tuples avec ratio/ingredients"""
-		this.listeGras = acideGras
-		this.he = he
-		this.additifs = additifs
+		this.listeGras = list()
+		this.he = list()
+		this.additifs = list()
 
 	def soude(this):
 		"""Quantité de soude en pourcentage.
@@ -21,7 +21,7 @@ class Recette:
 		for (taux, gras) in this.listeGras:
 			acidegras = Ingredients.Gras()
 			acidegras.load(gras)
-			soude += float(taux) * float(acidegras.sap) * ( 40.0 / 56100.0)
+			soude += float(taux) * float(acidegras.sap) * ( 40.0 / 56100.0) * (1.0 - this.surgraissage)
 		return soude
 
 	def eau(this):
@@ -36,7 +36,6 @@ class Recette:
 		for (taux, nom) in this.listeGras:
 			gras = Ingredients.Gras()
 			gras.load(nom)
-			print gras.acideGras
 			this.sat += gras.saturation() * taux
 			this.unsat += gras.unsaturation() * taux
 
@@ -51,10 +50,46 @@ class Recette:
 		else:
 			liste = this.additifs
 
-		nombre = len(liste)
-		partial = float(taux / nombre)
-		liste = [ (t - partial, i) for (t, i) in liste ]
-		liste.append((taux, ingredient))
+		if len(liste) >= 1:
+			if ingredient in [ i for (t, i) in liste ]:
+				nombre = len(liste) - 1
+				partial = float(taux / nombre) 
+				exist = [ (t + taux, i) for (t, i) in liste if i == ingredient ]
+				liste = [ (t - partial, i) for (t, i) in liste if i != ingredient and if t > 0.0 ]
+				liste += exist
+			else:
+				nombre = len(liste)
+				partial = float(taux / nombre)
+				liste = [ (t - partial, i) for (t, i) in liste ]
+				liste.append((taux, ingredient))
+		else:
+			liste.append((taux, ingredient))
+
+		if famille == "Gras":
+			this.listeGras = liste[:]
+		elif famille == "HE":
+			this.he = liste[:]
+		else:
+			this.additifs = liste[:]
+
+	def rem(this, ingredient):
+		ingr = Ingredients.Ingredient()
+		ingr.load(ingredient)
+		famille = ingr.famille
+		if famille == "Gras":
+			liste = this.listeGras
+		elif famille == "HE":
+			liste = this.he
+		else:
+			liste = this.additifs
+
+		if ingredient in [ i for (t, i) in liste ]:
+			if len(liste) <= 1: liste = list()
+			else:
+				nombre = len(liste)
+				taux = [ t for (t, i) in liste if i == ingredient ]
+				partial = float(taux / nombre)
+				liste = [ (t + partial, i) for (t, i) in liste if i != ingredient ]
 
 		if famille == "Gras":
 			this.listeGras = liste[:]
