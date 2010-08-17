@@ -1,17 +1,25 @@
 #!/usr/bin/python
 # -*- coding: iso-8859-15 -*-
 import Ingredients
+import Databases as db
 
 class Recette:
 	"""Une classe pour stocker les recettes"""
 	surgraissage = 0.08
 	soude = 0
 	concentration = 0.38
+	nom = "REC"
+
 	def __init__(this):
 		"""Les arguments sont des listes de tuples avec ratio/ingredients"""
 		this.listeGras = list()
 		this.he = list()
 		this.additifs = list()
+
+	def setNom(this):
+		if this.nom != "REC":
+			return
+		db.cursor.execute("SELECT max(id) FROM Recettes;")
 
 	def soude(this):
 		"""Quantité de soude en pourcentage.
@@ -23,11 +31,6 @@ class Recette:
 			acidegras.load(gras)
 			soude += float(taux) * float(acidegras.sap) * ( 40.0 / 56100.0) * (1.0 - this.surgraissage)
 		return soude
-
-	def eau(this):
-		"""Concentration = eau/graisse
-		eau = concentration*graisse"""
-		return this.concentration 
 
 	def satUnsat(this):
 		# On commence par rafraîchir les gras de la recette

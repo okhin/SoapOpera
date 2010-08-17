@@ -8,7 +8,6 @@ import os.path
 # Applicatives Import
 import Csv
 import Ingredients
-import Recettes
 
 connection = sqlite.connect('soap_opera.db')
 cursor = connection.cursor()
