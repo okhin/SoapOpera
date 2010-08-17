@@ -20,6 +20,7 @@ class Recette:
 		if this.nom != "REC":
 			return
 		db.cursor.execute("SELECT max(id) FROM Recettes;")
+		print db.cursor.fetch()
 
 	def soude(this):
 		"""Quantité de soude en pourcentage.
@@ -58,7 +59,7 @@ class Recette:
 				nombre = len(liste) - 1
 				partial = float(taux / nombre) 
 				exist = [ (t + taux, i) for (t, i) in liste if i == ingredient ]
-				liste = [ (t - partial, i) for (t, i) in liste if i != ingredient and if t > 0.0 ]
+				liste = [ (t - partial, i) for (t, i) in liste if i != ingredient and t > 0.0 ]
 				liste += exist
 			else:
 				nombre = len(liste)
