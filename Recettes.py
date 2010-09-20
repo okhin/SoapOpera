@@ -9,18 +9,14 @@ class Recette:
 	soude = 0
 	concentration = 0.38
 	nom = "REC"
+	version = 0
+	parent = ""
 
 	def __init__(this):
 		"""Les arguments sont des listes de tuples avec ratio/ingredients"""
 		this.listeGras = list()
 		this.he = list()
 		this.additifs = list()
-
-	def setNom(this):
-		if this.nom != "REC":
-			return
-		db.cursor.execute("SELECT max(id) FROM Recettes;")
-		print db.cursor.fetch()
 
 	def soude(this):
 		"""Quantité de soude en pourcentage.
@@ -43,61 +39,53 @@ class Recette:
 			this.sat += gras.saturation() * taux
 			this.unsat += gras.unsaturation() * taux
 
-	def add(this, ingredient, taux):
-		ingr = Ingredients.Ingredient()
-		ingr.load(ingredient)
-		famille = ingr.famille
-		if famille == "Gras":
-			liste = this.listeGras
-		elif famille == "HE":
-			liste = this.he
-		else:
-			liste = this.additifs
+	def isChildOf(this, parent):
+		"""Est-ce que cette recette descend d'une autre"""
+		if parent.nom == this.parent and this.parent != "":
+			return true
+		return false
 
-		if len(liste) >= 1:
-			if ingredient in [ i for (t, i) in liste ]:
-				nombre = len(liste) - 1
-				partial = float(taux / nombre) 
-				exist = [ (t + taux, i) for (t, i) in liste if i == ingredient ]
-				liste = [ (t - partial, i) for (t, i) in liste if i != ingredient and t > 0.0 ]
-				liste += exist
-			else:
-				nombre = len(liste)
-				partial = float(taux / nombre)
-				liste = [ (t - partial, i) for (t, i) in liste ]
-				liste.append((taux, ingredient))
-		else:
-			liste.append((taux, ingredient))
+	def isSiblingOf(this, child):
+		"""Est-ce que cette recette a un parent commun avec une autre"""
+		if child.parent == this.parent and this.parent != "":
+			return true
+		return false
 
-		if famille == "Gras":
-			this.listeGras = liste[:]
-		elif famille == "HE":
-			this.he = liste[:]
-		else:
-			this.additifs = liste[:]
+	def save(this):
+		db.cursor.execute("SELECT * FROM Recette WHERE ref LIKE 'nom';")
+		exist = db.cursor.fetchone()
+		if exist != None:
+			# On a donc déjà des versions de cette recette dans la base
+			this.version = db.cursor.execute("SELECT max(version) FROM Recette WHERE ref LIKE 'nom';") + 1
+		db.cursor.execute("INSERT INTO Recette VALUES (ref = ?, version = ?, parent = ?, surgraissage = ?, concentration = ?);", this.nom, this.version, this.parent, this.surgraissage, this.concentration)
+		db.connection.commit()
 
-	def rem(this, ingredient):
-		ingr = Ingredients.Ingredient()
-		ingr.load(ingredient)
-		famille = ingr.famille
-		if famille == "Gras":
-			liste = this.listeGras
-		elif famille == "HE":
-			liste = this.he
-		else:
-			liste = this.additifs
+		# On recupère l'id de cette recette (même ref + même version)
+		db.cursor.execute("SELECT id FROM Recette WHERE version = ? AND ref = ?;", this.version, this.nom)
+		rkey = db.cursor.fetchone;
 
-		if ingredient in [ i for (t, i) in liste ]:
-			if len(liste) <= 1: liste = list()
-			else:
-				nombre = len(liste)
-				taux = [ t for (t, i) in liste if i == ingredient ]
-				partial = float(taux / nombre)
-				liste = [ (t + partial, i) for (t, i) in liste if i != ingredient ]
+		# On sauvegarde les gras maintenant
+		for (taux, gras) in this.listeGras:
+			# On commence par recuperer l'ID de l'acidegras
+			db.cursor.execute("SELECT a.id FROM AcideGras as a, Ingredients as i WHERE a.id = i.id AND i.nom = ?;", gras)
+			gkey = db.cursor.fetchone()
 
-		if famille == "Gras":
-			this.listeGras = liste[:]
-		elif famille == "HE":
-			this.he = liste[:]
-		else:
-			this.additifs = liste[:]
+			# On insere ensuite le tout dans la relation recette/AcideGras
+			db.cursor.execute("INSERT INTO rec_acidegras VALUES (?, ?, ?);", rkey[0], gkey[0], taux)
+			db.connection.commit()
+
+		for (taux, he) in this.he:
+			# Meme chose pour les he, sauf que l'id est plus simple a recuperer
+			db.cursor.execute("SELECT id FROM Ingredients WHERE famille = 'HE'AND nom = ?;", he)
+			hkey = db.cursor.fetchone()
+
+			db.cursor.execute("INSERT INTO rec_he VALUES(?, ?, ?);", rkey[0], hkey[0], taux)
+			db.connection.commit()
+
+		for (taux, add) in this.additifs:
+			# Et encore u ne fois pour les additif
+			db.cursos.execute("SELECT id FROM Ingredients WHERE nom = ?;", add)
+			akey = db.cursor.fetchone()
+
+			db.cursor.execute("INSERT INTO rec_additifs VALUES(?, ?, ?);", rkey[0], akey[0], taux)
+			db.connectoion.commit()

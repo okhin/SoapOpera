@@ -39,7 +39,17 @@ def InitAppli():
 	connection.commit()
 
 	# Tables de recette
-	cursor.execute('CREATE TABLE "Recette" (id INTEGER PRIMARY KEY AUTOINCREMENT, nom VARCHAR(50), ref VARCHAR(50))')
+	cursor.execute('CREATE TABLE "Recette" (id INTEGER PRIMARY KEY AUTOINCREMENT, \
+		nom VARCHAR(50), \
+		ref VARCHAR(50), \
+		surgraissage TEXT(5), \
+		concentration TEXT(5), \
+		version NUMBER, \
+		parent VARCHAR(50), \
+		demande_val BOOLEAN, \
+		date_demande NUMBER, \
+		validation BOOLEAN, \
+		date_validation NUMBER)')
 	connection.commit()
 	
 	# Tables de relation recettes
