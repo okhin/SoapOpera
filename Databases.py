@@ -41,7 +41,7 @@ def InitAppli():
 	# Tables de recette
 	cursor.execute('CREATE TABLE "Recette" (id INTEGER PRIMARY KEY AUTOINCREMENT, \
 		nom VARCHAR(50), \
-		ref VARCHAR(50), \
+		ref VARCHAR(50) UNIQUE, \
 		surgraissage TEXT(5), \
 		concentration TEXT(5), \
 		version NUMBER, \

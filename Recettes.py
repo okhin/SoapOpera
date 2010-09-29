@@ -9,7 +9,6 @@ class Recette:
 	soude = 0
 	concentration = 0.38
 	nom = "REC"
-	version = 0
 	parent = ""
 
 	def __init__(this):
@@ -39,34 +38,23 @@ class Recette:
 			this.sat += gras.saturation() * taux
 			this.unsat += gras.unsaturation() * taux
 
-	def isChildOf(this, parent):
-		"""Est-ce que cette recette descend d'une autre"""
-		if parent.nom == this.parent and this.parent != "":
-			return true
-		return false
-
-	def isSiblingOf(this, child):
-		"""Est-ce que cette recette a un parent commun avec une autre"""
-		if child.parent == this.parent and this.parent != "":
-			return true
-		return false
-
+	def getChild(this):
+		db.cursor.execute("SELECT * From Recette WHERE parent LIKE ?;", this.nom)
+		
 	def save(this):
-		db.cursor.execute("SELECT * FROM Recette WHERE ref LIKE 'nom';")
-		exist = db.cursor.fetchone()
-		if exist != None:
-			# On a donc déjà des versions de cette recette dans la base
-			this.version = db.cursor.execute("SELECT max(version) FROM Recette WHERE ref LIKE 'nom';") + 1
-		db.cursor.execute("INSERT INTO Recette VALUES (ref = ?, version = ?, parent = ?, surgraissage = ?, concentration = ?);", this.nom, this.version, this.parent, this.surgraissage, this.concentration)
+		"""On efface le contenu de la precedente version pour y stocker celui de la nouvelle"""
+		# Poru la table recette on fait d'abord un UPDATE
+		db.cursor.execute("INSERT OR REPLACE INTO Recette VALUES (ref = ?, version = ?, parent = ?, surgraissage = ?, concentration = ?);", this.nom, this.version, this.parent, this.surgraissage, this.concentration)
 		db.connection.commit()
 
-		# On recupère l'id de cette recette (même ref + même version)
-		db.cursor.execute("SELECT id FROM Recette WHERE version = ? AND ref = ?;", this.version, this.nom)
+		# On recupère l'id de cette recette (même ref)
+		db.cursor.execute("SELECT id FROM Recette WHERE ref = ?;", this.nom)
 		rkey = db.cursor.fetchone;
 
 		# On sauvegarde les gras maintenant
 		for (taux, gras) in this.listeGras:
 			# On commence par recuperer l'ID de l'acidegras
+			db.cursor.execute("DELETE FROM rec_acidegras WHERE rec_id = ?;", rkey[0])
 			db.cursor.execute("SELECT a.id FROM AcideGras as a, Ingredients as i WHERE a.id = i.id AND i.nom = ?;", gras)
 			gkey = db.cursor.fetchone()
 
@@ -76,6 +64,7 @@ class Recette:
 
 		for (taux, he) in this.he:
 			# Meme chose pour les he, sauf que l'id est plus simple a recuperer
+			db.cursor.execute("DELETE FROM rec_he WHERE rec_id = ?;", rkey[0])
 			db.cursor.execute("SELECT id FROM Ingredients WHERE famille = 'HE'AND nom = ?;", he)
 			hkey = db.cursor.fetchone()
 
@@ -83,9 +72,10 @@ class Recette:
 			db.connection.commit()
 
 		for (taux, add) in this.additifs:
-			# Et encore u ne fois pour les additif
+			# Et encore une fois pour les additif
+			db.cursor.execute("DELETE FROM rec_additifs WHERE rec_id = ?;", rkey[0])
 			db.cursos.execute("SELECT id FROM Ingredients WHERE nom = ?;", add)
 			akey = db.cursor.fetchone()
 
 			db.cursor.execute("INSERT INTO rec_additifs VALUES(?, ?, ?);", rkey[0], akey[0], taux)
-			db.connectoion.commit()
+			db.connection.commit()
