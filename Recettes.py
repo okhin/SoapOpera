@@ -39,11 +39,13 @@ class Recette:
 			this.unsat += gras.unsaturation() * taux
 
 	def getChild(this):
-		db.cursor.execute("SELECT * From Recette WHERE parent LIKE ?;", this.nom)
+		"""on renvoie les ID de tous les enfants de ce node"""
+		db.cursor.execute("SELECT id FROM Recette WHERE parent LIKE '?';", this.nom)
+		return db.cursor.fetchall()
 		
 	def save(this):
 		"""On efface le contenu de la precedente version pour y stocker celui de la nouvelle"""
-		# Poru la table recette on fait d'abord un UPDATE
+		# Pour la table recette on fait d'abord un UPDATE
 		db.cursor.execute("INSERT OR REPLACE INTO Recette VALUES (ref = ?, version = ?, parent = ?, surgraissage = ?, concentration = ?);", this.nom, this.version, this.parent, this.surgraissage, this.concentration)
 		db.connection.commit()
 
