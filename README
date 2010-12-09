@@ -1,12 +1,1 @@
-DATABASES SCHEMA
-Recettes stockées dans 4 tables
-- recette(id,nom)
-- rec_acidegras(rec,acidegras,ratio)
-- rec_he(rec,he,ratio)
-- rec_additif(rec,additif,ratio)
-
-Ingredients stockés dans une table
-- id, ref, nom, famille, nom_courant
-
-Gras, stockés dans la table Ingredients plus une table acidegras
-- acidegras(id, indices divers et variés)
+SoapOpera
